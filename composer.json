@@ -1,0 +1,45 @@
+{
+    "name": "aihotel/ai-client",
+    "description": "Unified PHP client for AI services (GPT and more)",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Denis Galetin",
+            "email": "galetindenis@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=8.4",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "vlucas/phpdotenv": "^5.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0",
+        "phpstan/phpstan": "^1.10",
+        "squizlabs/php_codesniffer": "^3.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "AiHotel\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AiHotel\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "phpstan": "phpstan analyse",
+        "cs-check": "phpcs",
+        "cs-fix": "phpcbf"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
+
