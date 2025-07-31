@@ -1,14 +1,29 @@
 {
     "name": "aihotel/ai-client",
-    "description": "Unified PHP client for AI services (GPT and more)",
+    "description": "Unified PHP client for AI services (OpenAI GPT, Claude, and more)",
     "type": "library",
     "license": "MIT",
+    "homepage": "https://github.com/dengaletin/ai-hotel",
+    "keywords": [
+        "ai",
+        "openai",
+        "gpt",
+        "claude",
+        "chat",
+        "api",
+        "client"
+    ],
     "authors": [
         {
             "name": "Denis Galetin",
-            "email": "galetindenis@gmail.com"
+            "email": "galetindenis@gmail.com",
+            "role": "Developer"
         }
     ],
+    "support": {
+        "issues": "https://github.com/dengaletin/ai-hotel/issues",
+        "source": "https://github.com/dengaletin/ai-hotel"
+    },
     "require": {
         "php": ">=8.4",
         "ext-curl": "*",
@@ -34,12 +49,14 @@
         "test": "phpunit",
         "phpstan": "phpstan analyse",
         "cs-check": "phpcs",
-        "cs-fix": "phpcbf"
+        "cs-fix": "phpcbf",
+        "test-coverage": "phpunit --coverage-html build/coverage"
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "optimize-autoloader": true,
+        "preferred-install": "dist"
     },
     "minimum-stability": "stable",
     "prefer-stable": true
 }
-
