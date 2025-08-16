@@ -1,16 +1,16 @@
 # 🤖 AiHotel - Simple AI Client for PHP
 
-[![PHP Version](https://img.shields.io/badge/php-%3E%3D8.4-8892BF.svg)](https://php.net/)
+[![PHP Version](https://img.shields.io/badge/php-%3E%3D8.1-8892BF.svg)](https://php.net/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Clean, simple, and powerful PHP client for OpenAI GPT. Built with modern PHP 8.4+ features, strict types, and developer happiness in mind.
+Clean, simple, and powerful PHP client for OpenAI GPT. Built with modern PHP 8.1+ features, strict types, and developer happiness in mind.
 
 ## ✨ Why AiHotel?
 
 - **Zero Configuration Hassle** - Just add your API key and go
 - **Conversation History** - Built-in chat history management
 - **Exception-Based Error Handling** - Clear exceptions with helpful messages
-- **Modern PHP** - Uses latest PHP 8.4+ features with strict types
+- **Modern PHP** - Uses latest PHP 8.1+ features with strict types
 - **Clean API** - Simple, intuitive interface
 
 ## 🚀 Quick Start
@@ -334,4 +334,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🔗 Links
 
 - [OpenAI API Documentation](https://platform.openai.com/docs)
-- [PHP 8.4 Documentation](https://www.php.net/releases/8.4/en.php)
+- [PHP 8.1 Documentation](https://www.php.net/releases/8_1_x.php)
