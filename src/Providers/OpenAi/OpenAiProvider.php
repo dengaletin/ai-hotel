@@ -8,7 +8,6 @@ use AiHotel\Dto\Request\OpenAi\Request;
 use AiHotel\Dto\Response\OpenAi\Response;
 use AiHotel\Enum\Providers;
 use AiHotel\Exceptions\AiHotelException;
-use AiHotel\Exceptions\OpenAi\OpenAiApiKeyMissingException;
 use Exception;
 
 class OpenAiProvider implements OpenAiProviderInterface
@@ -31,20 +30,13 @@ class OpenAiProvider implements OpenAiProviderInterface
     }
 
     /**
-     * @param Request $request
-     * @return Response
      * @throws AiHotelException
-     * @throws OpenAiApiKeyMissingException
      */
     public function chat(Request $request): Response
     {
-        if (empty($this->apiKey)) {
-            throw new OpenAiApiKeyMissingException();
-        }
-
         try {
             return $this->sendRequest($request);
-        } catch (OpenAiApiKeyMissingException|AiHotelException $e) {
+        } catch (AiHotelException $e) {
             throw $e;
         } catch (Exception $e) {
             throw new AiHotelException(Providers::OPENAI->value . ' API request failed: ' . $e->getMessage(), 0, $e);
@@ -52,17 +44,10 @@ class OpenAiProvider implements OpenAiProviderInterface
     }
 
     /**
-     * @param Request $request
-     * @return Response
      * @throws AiHotelException
-     * @throws OpenAiApiKeyMissingException
      */
     private function sendRequest(Request $request): Response
     {
-        if (empty($this->apiKey)) {
-            throw new OpenAiApiKeyMissingException();
-        }
-
         $payload = $request->toArray();
 
         $ch = curl_init();
