@@ -29,11 +29,12 @@ class OpenAiProvider implements OpenAiProviderInterface
         return !empty($this->apiKey) && extension_loaded('curl');
     }
 
-    /**
-     * @throws AiHotelException
-     */
     public function chat(Request $request): Response
     {
+        if (empty($this->apiKey)) {
+            throw new AiHotelException('OpenAI API key is required for chat requests');
+        }
+
         try {
             return $this->sendRequest($request);
         } catch (AiHotelException $e) {
@@ -83,14 +84,13 @@ class OpenAiProvider implements OpenAiProviderInterface
         if ($httpCode !== 200) {
             $error = $data['error']['message'] ?? 'Unknown API error';
 
-            return new Response(false, null, null, null, $error);
+            throw new AiHotelException("OpenAI API error: {$error}");
         }
 
         $content = $data['choices'][0]['message']['content'] ?? null;
         $tokensUsed = $data['usage']['total_tokens'] ?? null;
 
         return new Response(
-            success: true,
             content: $content,
             tokensUsed: $tokensUsed,
             model: $request->model->value,

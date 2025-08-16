@@ -9,8 +9,9 @@ Clean, simple, and powerful PHP client for OpenAI GPT. Built with modern PHP 8.4
 
 - **Zero Configuration Hassle** - Just add your API key and go
 - **Conversation History** - Built-in chat history management
-- **Smart Error Handling** - Clear exceptions with helpful messages
-- **Modern PHP** - Uses latest PHP features
+- **Exception-Based Error Handling** - Clear exceptions with helpful messages
+- **Modern PHP** - Uses latest PHP 8.4+ features with strict types
+- **Clean API** - Simple, intuitive interface
 
 ## 🚀 Quick Start
 
@@ -20,37 +21,66 @@ Clean, simple, and powerful PHP client for OpenAI GPT. Built with modern PHP 8.4
 composer require aihotel/ai-client
 ```
 
-### Setup
-
-Create `.aihotel.env` in your project root:
-
-```env
-OPENAI_API_KEY=sk-your-openai-api-key-here
-```
-
 ### Your First Chat
 
 ```php
+use AiHotel\Services\AiHotelClient;
+use AiHotel\Dto\Request\OpenAi\Request;
+use AiHotel\Enum\OpenAi\Model;
+use AiHotel\Exceptions\AiHotelException;
 
-$client = new AiHotelClient();
+try {
+    // Create client with your OpenAI API key
+    $client = AiHotelClient::create([
+        'openai_api_key' => 'sk-your-openai-api-key-here'
+    ]);
 
-$request = new Request(
-    message: 'Explain quantum computing in simple terms',
-    model: Model::GPT_4,
-    temperature: 0.7
-);
+    $request = new Request(
+        message: 'Explain quantum computing in simple terms',
+        model: Model::GPT_4
+    );
 
-$response = $client->gpt()->chat($request);
-
-if ($response->isSuccess()) {
+    $response = $client->gpt()->chat($request);
     echo $response->getContent();
-    echo "\nTokens used: " . $response->getTokensUsed();
-} else {
-    echo "Error: " . $response->getError();
+    
+} catch (AiHotelException $e) {
+    echo "Error: " . $e->getMessage();
 }
 ```
 
-That's it! 🎉
+## 💬 Chat with History
+
+```php
+use AiHotel\Services\Builders\OpenAi\HistoryBuilder;
+use AiHotel\Enum\OpenAi\Role;
+
+try {
+    $client = AiHotelClient::create([
+        'openai_api_key' => 'sk-your-openai-api-key-here'
+    ]);
+
+    // Build conversation history
+    $history = HistoryBuilder::create()
+        ->addMessage(Role::SYSTEM, 'You are a helpful coding assistant')
+        ->addMessage(Role::USER, 'How do I create a PHP class?')
+        ->addMessage(Role::ASSISTANT, 'To create a PHP class, use the `class` keyword...')
+        ->addMessage(Role::USER, 'Can you show me an example?')
+        ->build();
+
+    $request = new Request(
+        message: 'Make it a simple User class',
+        history: $history,
+        model: Model::GPT_4,
+        temperature: 0.7
+    );
+
+    $response = $client->gpt()->chat($request);
+    echo $response->getContent();
+    
+} catch (AiHotelException $e) {
+    echo "Error: " . $e->getMessage();
+}
+```
 
 ## 📚 Usage Examples
 
@@ -79,6 +109,7 @@ $request = new Request(
 );
 
 $response = $client->gpt()->chat($request);
+echo $response->getContent();
 ```
 
 ### Conversation with History
@@ -98,11 +129,13 @@ $history = (new HistoryBuilder())
 // Continue the conversation
 $request = new Request(
     message: 'What was my name again?',
-    history: $history
+    history: $history,
+    model: Model::GPT_4
 );
 
 $response = $client->gpt()->chat($request);
 // Will respond: "Your name is John!"
+echo $response->getContent();
 ```
 
 ### Custom Parameters
@@ -114,6 +147,9 @@ $request = new Request(
     temperature: 1.2,  // More creative
     maxTokens: 500     // Limit response length
 );
+
+$response = $client->gpt()->chat($request);
+echo $response->getContent();
 ```
 
 ## 🎯 Available Models
@@ -126,35 +162,37 @@ Model::GPT_4_TURBO    // Faster and cheaper than GPT-4
 Model::GPT_3_5_TURBO  // Fast and cost-effective
 ```
 
-## 🛡️ Error Handling
+## 🛡️ Exception-Based Error Handling
 
-The library provides specific exceptions for different scenarios:
+The library uses exceptions for clean error handling:
 
 ```php
+use AiHotel\Exceptions\AiHotelException;
 
 try {
     $response = $client->gpt()->chat($request);
-} catch (OpenAiApiKeyMissingException $e) {
-    echo "Please add your OpenAI API key to .aihotel.env file";
+    echo $response->getContent();
+    
 } catch (AiHotelException $e) {
+    // Handle API errors
     echo "API Error: " . $e->getMessage();
+    
+} catch (Exception $e) {
+    // Handle unexpected errors
+    echo "Unexpected error: " . $e->getMessage();
 }
 ```
 
 ## 📋 Response Information
 
-Every response contains useful metadata:
+Every successful response contains useful metadata:
 
 ```php
 $response = $client->gpt()->chat($request);
 
-if ($response->isSuccess()) {
-    echo "Content: " . $response->getContent();
-    echo "Tokens used: " . $response->getTokensUsed();
-    echo "Model: " . $response->getModel();
-} else {
-    echo "Error: " . $response->getError();
-}
+echo "Content: " . $response->getContent();
+echo "Tokens used: " . $response->getTokensUsed();
+echo "Model: " . $response->getModel();
 ```
 
 ## 🔧 Advanced Features
@@ -169,78 +207,131 @@ use AiHotel\Enum\OpenAi\Role;
 
 $historyBuilder = new HistoryBuilder();
 
-// Add messages
+// Add messages fluently
 $historyBuilder
+    ->addMessage(Role::SYSTEM, 'You are a helpful assistant')
     ->addMessage(Role::USER, 'Hello!')
-    ->addMessage(Role::ASSISTANT, 'Hi there! How can I help?');
+    ->addMessage(Role::ASSISTANT, 'Hi there! How can I help?')
+    ->addMessage(Role::USER, 'Tell me about PHP');
 
-// Clear history if needed
-$historyBuilder->clear();
-
-// Get raw messages array
-$messages = $historyBuilder->getMessages();
-
-// Build History object
+// Build the history array
 $history = $historyBuilder->build();
+
+// Use in request
+$request = new Request(
+    message: 'What are the benefits of PHP 8.4?',
+    history: $history,
+    model: Model::GPT_4
+);
 ```
 
-### Provider Availability
-
-Check if OpenAI is available before making requests:
+### Alternative History Builder Syntax
 
 ```php
-$provider = $client->gpt();
+// Static factory method
+$history = HistoryBuilder::create()
+    ->addMessage(Role::USER, 'Start conversation')
+    ->build();
+```
 
-if ($provider->isAvailable()) {
-    $response = $provider->chat($request);
-} else {
-    echo "OpenAI provider is not available";
+## 🚀 Best Practices
+
+### 1. Always Use Try-Catch
+
+```php
+try {
+    $response = $client->gpt()->chat($request);
+    // Process successful response
+    echo $response->getContent();
+} catch (AiHotelException $e) {
+    // Log error and show user-friendly message
+    error_log($e->getMessage());
+    echo "Sorry, I couldn't process your request right now.";
 }
 ```
 
-## 📁 Project Structure
+### 2. Manage Token Usage
 
-```
-src/
-├── Services/
-│   ├── AiHotelClient.php      # Main client
-│   └── Builders/              # Helper builders
-├── Providers/
-│   └── OpenAi/               # OpenAI implementation
-├── Dto/
-│   ├── Request/              # Request objects
-│   └── Response/             # Response objects
-├── Enum/                     # Type-safe enums
-└── Exceptions/               # Custom exceptions
+```php
+$response = $client->gpt()->chat($request);
+
+// Monitor token usage for cost control
+$tokensUsed = $response->getTokensUsed();
+if ($tokensUsed > 1000) {
+    // Log high usage or notify admin
+    error_log("High token usage: {$tokensUsed} tokens");
+}
 ```
 
-## 🔑 Getting Your API Key
+### 3. Use System Prompts for Consistency
 
-1. Go to [OpenAI Platform](https://platform.openai.com/api-keys)
-2. Create an account or sign in
-3. Generate a new API key
-4. Add it to your `.aihotel.env` file
+```php
+$systemPrompt = 'You are a helpful coding assistant. ' .
+               'Always provide working code examples and explain your solutions clearly.';
 
-## 📦 Requirements
+$request = new Request(
+    message: $userMessage,
+    model: Model::GPT_4,
+    systemPrompt: $systemPrompt
+);
+```
 
-- PHP 8.4 or higher
-- cURL extension
+## 🔧 Configuration
+
+### Environment Variables
+
+You can use environment variables for API keys:
+
+```php
+// .env file
+OPENAI_API_KEY=sk-your-openai-api-key-here
+
+// PHP code
+$client = AiHotelClient::create([
+    'openai_api_key' => $_ENV['OPENAI_API_KEY'] ?? getenv('OPENAI_API_KEY')
+]);
+```
+
+### Custom Timeout
+
+```php
+// Configure longer timeout for complex requests
+$client = AiHotelClient::create([
+    'openai_api_key' => 'sk-your-key',
+    'timeout' => 60  // 60 seconds
+]);
+```
+
+## 📖 API Reference
+
+### Request Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `message` | `string` | Yes | The user message to send |
+| `model` | `Model` | No | OpenAI model to use (default: GPT_3_5_TURBO) |
+| `systemPrompt` | `string` | No | System prompt to set behavior |
+| `history` | `array` | No | Conversation history |
+| `temperature` | `float` | No | Creativity level (0.0-2.0) |
+| `maxTokens` | `int` | No | Maximum response length |
+
+### Response Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `content` | `string\|null` | The AI response content |
+| `tokensUsed` | `int\|null` | Number of tokens consumed |
+| `model` | `string\|null` | Model used for the response |
 
 ## 🤝 Contributing
 
-Found a bug? Have a feature idea? We'd love your help!
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📄 License
 
-MIT License - feel free to use this in your projects!
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
----
+## 🔗 Links
 
-**Made with ❤️ for the PHP community**
-
-*Stop wrestling with AI APIs and start building amazing things!*
+- [OpenAI API Documentation](https://platform.openai.com/docs)
+- [PHP 8.4 Documentation](https://www.php.net/releases/8.4/en.php)

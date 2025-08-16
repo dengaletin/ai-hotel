@@ -22,12 +22,7 @@ class AiHotelClient implements AiHotelClientInterface
         return $this->factory->createOpenAiProvider();
     }
 
-    public static function create(): self
-    {
-        return new self();
-    }
-
-    public static function withConfig(array $config): self
+    public static function create(array $config): self
     {
         $factory = new ProviderFactory(
             openAiApiKey: $config['openai_api_key'] ?? null
